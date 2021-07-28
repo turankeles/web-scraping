@@ -1,0 +1,81 @@
+import pandas as pd
+from bs4 import BeautifulSoup
+from urllib.request import urlopen
+def car_scraping(pages):
+  global Price
+  Make,Model,Rest,Mileage,Price,Price_drop,Dealer,Rating,Used,Year=[],[],[],[],[],[],[],[],[],[]
+  for page in range(pages):
+    url=f"https://www.cars.com/shopping/results/?page={page}&page_size=20&dealer_id=&list_price_max=&list_price_min=&makes[]=&maximum_distance=20&mileage_max=&sort=best_match_desc&stock_type=all&year_max=&year_min=&zip="
+    html=urlopen(url)
+    soup=BeautifulSoup(html,"html.parser")
+    for i in soup.findAll("div",{"class":"vehicle-card-main"}):
+      # print(i.findAll("p",{"class":"stock-type"})[0].text)
+      usage=i.findAll("p",{"class":"stock-type"})[0].text
+      # print(i.findAll("h2",{"class":"title"})[0].text.split()[0])
+      year=i.findAll("h2",{"class":"title"})[0].text.split()[0]
+      car=i.findAll("h2",{"class":"title"})[0].text.split()[1:]
+      make=car[0]#
+      model=car[1]
+      price=i.findAll("span",{"class","primary-price"})[0].text[1:]
+      mileage=i.findAll("div",{"class","mileage"})[0].get_text().replace("mi.","")
+      # print(mileage[0].get_text().replace("mi.",""))
+      price_drop=i.findAll("span",{"class":"price-drop"})
+      # print(price_drop)
+      for y in price_drop:
+        drop_price=y.text.replace("price drop","").strip("$")
+        
+        Price_drop.append(drop_price)
+        
+      dealer=i.findAll("strong")[0].text
+      rating=i.findAll("span",class_="sds-rating__count")
+      ratings=([(rate.text) for rate in rating])
+      if ratings:
+        
+        Rating.append(ratings[0])
+      else:
+          
+        Rating.append(None)
+      
+      Used.append(usage)
+      Year.append(year)
+      Make.append(make)
+      Model.append(model)
+      
+      Mileage.append(mileage)
+      Price.append(price)
+     
+      Dealer.append(dealer)
+  Mileage=[float(i.replace(",",".")) for i in Mileage]
+  cost=[]
+  global df
+  for i in Price:
+    try:
+      i=i.replace(",",".")
+      i=float(i)
+      cost.append(i)
+    except:
+      i=None
+      cost.append(i) 
+  Price=cost    
+  drop=[]
+  for i in Price_drop:
+    if i:
+      i=i.replace(",","")
+      drop.append(int(i))
+    else:
+      i=0
+      drop.append(i)
+  Price_drop=drop
+
+ 
+  
+
+  features=Make,Model,Mileage,Price,Price_drop,Dealer,Rating,Used,Year
+  
+  df=pd.DataFrame(features).T
+  df.Price=Price
+  df.columns=["Make","Model","Mileage","Price","Price_drop","Dealer","Rating","Used","Year"] 
+
+  return df
+  
+data=car_scraping(60)
