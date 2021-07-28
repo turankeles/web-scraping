@@ -78,4 +78,4 @@ def car_scraping(pages):
 
   return df
   
-data=car_scraping(60)
+data=car_scraping(200)#First 200 pages
