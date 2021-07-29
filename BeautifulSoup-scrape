@@ -33,7 +33,6 @@ def car_scraping(pages):
         
         Rating.append(ratings[0])
       else:
-          
         Rating.append(None)
       
       Used.append(usage)
@@ -66,9 +65,6 @@ def car_scraping(pages):
       i=0
       drop.append(i)
   Price_drop=drop
-
- 
-  
 
   features=Make,Model,Mileage,Price,Price_drop,Dealer,Rating,Used,Year
   
